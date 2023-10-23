@@ -52,15 +52,20 @@ def clean_dataset(dataset, attributes, centered):
     sens_names = [key for key in sens_dict.keys() if sens_dict[key] == 1]
     print('there are {} sensitive features including derivative features'.format(len(sens_names)))
 
-    X_prime = X[sens_names]
-
     #X = X.reset_index(drop=True)
     #X_prime = X_prime.reset_index(drop=True)
 
     if(centered):
-        X = center(X)
-        X_prime = center(X_prime)
-
+        binary_columns = [col for col in X.columns if X[col].isin([0, 1]).all()]
+        non_binary_columns = [col for col in X.columns if col not in binary_columns]
+        normalized_X = X.copy()
+        for col in non_binary_columns: #Do not normalize columns that are one-hot-encoded
+            min_val = X[col].min()
+            max_val = X[col].max()
+            if min_val != max_val:  # Avoid division by zero if the column has a constant value
+                normalized_X[col] = (X[col] - min_val) / (max_val - min_val)
+        X = normalized_X
+    X_prime = X[sens_names]
     return X, X_prime, y 
 
 
