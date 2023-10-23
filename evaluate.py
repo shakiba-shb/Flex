@@ -8,6 +8,8 @@ import pandas as pd
 import time
 import json
 import importlib
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning, module="xgboost")
 
 def evaluate(model_name, dataset, seed, rdir):
     """Evaluates the estimator in methods/{model_name}.py on dataset and stores
