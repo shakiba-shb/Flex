@@ -2,6 +2,7 @@ import argparse
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import LabelEncoder
 
 def setup():
     parser = argparse.ArgumentParser(description='Fairness Data Cleaning')
@@ -41,6 +42,16 @@ def clean_dataset(dataset, attributes, centered):
 
     y = df[y_col[0]]
 
+    ## bin age into 5 year bins
+    if ('age' in df.columns):
+        bins = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100]
+        labels = [f"{i}-{i+4}" for i in range(0, 100, 5)]
+        df['age'] = pd.cut(df['age'], bins=bins, labels=labels, right=False)
+    ## Label encode columns
+    label_encoder = LabelEncoder()
+    for col in df.select_dtypes(['object','category']).columns:
+        df[col] = label_encoder.fit_transform(df[col])
+
     ## Do not use labels in rest of data
     X = df.loc[:, df.columns != y_col[0]]
     X = X.loc[:, X.columns != 'Unnamed: 0']
@@ -48,7 +59,7 @@ def clean_dataset(dataset, attributes, centered):
     sens_cols = [str(c) for c in sens_df.columns if sens_df[c][0] == 1]
     print('sensitive features: {}'.format(sens_cols))
     sens_dict = {c: 1 if c in sens_cols else 0 for c in df.columns}
-    X, sens_dict = one_hot_code(X, sens_dict)
+    #X, sens_dict = one_hot_code(X, sens_dict) 
     sens_names = [key for key in sens_dict.keys() if sens_dict[key] == 1]
     print('there are {} sensitive features including derivative features'.format(len(sens_names)))
 
@@ -56,10 +67,8 @@ def clean_dataset(dataset, attributes, centered):
     #X_prime = X_prime.reset_index(drop=True)
 
     if(centered):
-        binary_columns = [col for col in X.columns if X[col].isin([0, 1]).all()]
-        non_binary_columns = [col for col in X.columns if col not in binary_columns]
         normalized_X = X.copy()
-        for col in non_binary_columns: #Do not normalize columns that are one-hot-encoded
+        for col in X.columns: #Do not normalize columns that are one-hot-encoded
             min_val = X[col].min()
             max_val = X[col].max()
             if min_val != max_val:  # Avoid division by zero if the column has a constant value
