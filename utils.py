@@ -33,7 +33,8 @@ def setup_data(dataset,  seed, attributes=None):
             dataset,
             label='y',
             text_features=['chiefcomplaint'],
-            one_hot_encode=[False],
+            one_hot_encode=[True],
+            ohc_min_frac = 0.01
         )
         ALL_GROUPS = ['gender','ethnicity']
         X_prime = FEATURES[ALL_GROUPS]
@@ -42,8 +43,8 @@ def setup_data(dataset,  seed, attributes=None):
                 FEATURES,
                 X_prime,
                 LABEL,
-                train_size=0.001,
-                test_size=0.005,
+                train_size=0.1,
+                test_size=0.5,
                 random_state=seed,
                 stratify=LABEL
             )
@@ -210,7 +211,7 @@ def get_hypervolume(perf, xname, yname, reverse_x=False,
             x_vals[t] = [-x for x in x_vals[t]]
     if reverse_y: 
         for t in ['train','test']:
-            y_vals[t] = [-y for y in y_vals[t]]
+            y_vals[t] = [1-y for y in y_vals[t]]
     for t in ['train','test']:
         x_vals[t] = np.array(x_vals[t])
         y_vals[t] = np.array(y_vals[t])
@@ -252,7 +253,7 @@ def pareto_plot(perf,dataset_name,xname,yname,xname_nice,yname_nice,
             x_vals[t] = [-x for x in x_vals[t]]
     if reverse_y: 
         for t in ['train','test']:
-            y_vals[t] = [-y for y in y_vals[t]]
+            y_vals[t] = [1-y for y in y_vals[t]]
     for t in ['train','test']:
         x_vals[t] = np.array(x_vals[t])
         y_vals[t] = np.array(y_vals[t])
