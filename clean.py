@@ -57,12 +57,15 @@ def clean_dataset(dataset, attributes, centered):
     ## bin age into quartiles
     quantiles = [-float('inf'), 0.25, 0.5, 0.75, 1]
     if ('age' in X.columns):
-        #X['age']=-X['age']
-        bins = [0, 25, 50, 75, 100]
+        if dataname == 'student':
+            bins=[0, 5, 10, 15, 20, 25]
+            X['age'],bins = pd.cut(X['age'], bins=bins, labels=False, right=False, retbins=True)
+        else:
+            bins=[0, .25, .50, .75, 1] 
         #labels = [f"{i}-{i+24}" for i in range(0, 100, 25)]
-        X['age'] = pd.cut(X['age'], bins=bins, labels=False, right=False)
+            X['age'],bins = pd.qcut(X['age'], q=bins, labels=False, duplicates='drop',retbins=True)
         print(X['age'].value_counts())
-    
+
     ## bin protected features in communities dataset
     if (dataname == 'communities'):
         centered = False
