@@ -31,6 +31,7 @@ list should have 0 for an unprotected attribute, 1 for a protected attribute, an
 def clean_dataset(dataset, attributes, centered):
     df = pd.read_csv(dataset)
     sens_df = pd.read_csv(attributes)
+    dataname = dataset.split('/')[-1].split('.')[0]
 
     ## Get and remove label Y
     y_col = [str(c) for c in sens_df.columns if sens_df[c][0] == 2]
@@ -41,16 +42,6 @@ def clean_dataset(dataset, attributes, centered):
         raise ValueError('No label column used')
 
     y = df[y_col[0]]
-
-    ## bin age into 5 year bins
-    if ('age' in df.columns):
-        bins = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100]
-        labels = [f"{i}-{i+4}" for i in range(0, 100, 5)]
-        df['age'] = pd.cut(df['age'], bins=bins, labels=labels, right=False)
-    ## Label encode columns
-    label_encoder = LabelEncoder()
-    for col in df.select_dtypes(['object','category']).columns:
-        df[col] = label_encoder.fit_transform(df[col])
 
     ## Do not use labels in rest of data
     X = df.loc[:, df.columns != y_col[0]]
@@ -63,8 +54,27 @@ def clean_dataset(dataset, attributes, centered):
     sens_names = [key for key in sens_dict.keys() if sens_dict[key] == 1]
     print('there are {} sensitive features including derivative features'.format(len(sens_names)))
 
-    #X = X.reset_index(drop=True)
-    #X_prime = X_prime.reset_index(drop=True)
+    ## bin age into quartiles
+    quantiles = [-float('inf'), 0.25, 0.5, 0.75, 1]
+    if ('age' in X.columns):
+        #X['age']=-X['age']
+        bins = [0, 25, 50, 75, 100]
+        #labels = [f"{i}-{i+24}" for i in range(0, 100, 25)]
+        X['age'] = pd.cut(X['age'], bins=bins, labels=False, right=False)
+        print(X['age'].value_counts())
+    
+    ## bin protected features in communities dataset
+    if (dataname == 'communities'):
+        centered = False
+        for column in X.columns:
+            if column in sens_names:
+                X.loc[:, column]= pd.cut(X[column], bins=quantiles, labels=False)
+                print(X[column].value_counts())
+
+    ## Label encode columns
+    label_encoder = LabelEncoder()
+    for col in X.select_dtypes(['object','category']).columns:
+        X[col] = label_encoder.fit_transform(X[col])
 
     if(centered):
         normalized_X = X.copy()
