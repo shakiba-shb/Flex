@@ -10,10 +10,10 @@ from ml.lr import est as base_est
 
 est = FomoClassifier(
     estimator = base_est,
-    algorithm = Lexicase(),
+    algorithm = algorithm(pop_size=50),
     problem_type = LinearProblem, 
     fairness_metrics=[metric],
     store_final_models=True,
-    verbose=False,
+    verbose=True,
     n_jobs=1,
 )
