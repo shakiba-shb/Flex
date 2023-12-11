@@ -16,10 +16,19 @@ from itertools import chain
 import os
 import matplotlib
 matplotlib.rcParams['pdf.fonttype'] = 42
+from folktables import ACSDataSource, ACSEmployment, ACSIncome, ACSPublicCoverage, ACSMobility, ACSEmployment, ACSTravelTime
+
 figsize=(12,4)
 from fomo.metrics import subgroup_FPR_loss, subgroup_FNR_loss
 
 def setup_data(dataset,  seed, attributes=None):
+    ACSdata = {
+    'ACSIncome': ACSIncome,
+    'ACSPublicCoverage': ACSPublicCoverage,
+    'ACSMobility': ACSMobility,
+    'ACSEmployment': ACSEmployment,
+    'ACSTravelTime': ACSTravelTime
+}
 
     if attributes is None:
         attributes = dataset.replace('.csv','_protected.csv')
@@ -48,6 +57,17 @@ def setup_data(dataset,  seed, attributes=None):
                 random_state=seed,
                 stratify=LABEL
             )
+        sens_cols=ALL_GROUPS
+
+    elif (dataname in ACSdata.keys()):
+        data_source = ACSDataSource(survey_year='2018', horizon='1-Year', survey='person')
+        acs_data = data_source.get_data(states=["MI"], download=False)
+        features, label, group = ACSdata[dataname].df_to_pandas(acs_data)
+        label = label.squeeze()
+        X_train, X_test, X_prime_train, X_prime_test, y_train, y_test,  = train_test_split(
+            features, group, label, train_size=0.3, test_size=0.5, random_state=seed)
+        sens_cols=group.columns
+        print('sensitive features: {}'.format(sens_cols))
     else:
         X, X_prime, y = clean_dataset(dataset, attributes, centered=True)
         X_train, X_test, X_prime_train, X_prime_test, y_train, y_test = \
@@ -59,11 +79,11 @@ def setup_data(dataset,  seed, attributes=None):
                 random_state=seed,
                 stratify=y
             )
+        sens_df = pd.read_csv(attributes)
+        sens_cols = [str(c) for c in sens_df.columns if sens_df[c][0] == 1]
+    
     print('positive labels in test:',np.sum(y_test==1))
-    
-    sens_df = pd.read_csv(attributes)
-    sens_cols = [str(c) for c in sens_df.columns if sens_df[c][0] == 1]
-    
+      
     return X_train, X_test, X_prime_train, X_prime_test, y_train, y_test, sens_cols
 
 def evaluate_output(X, X_prime, y, predictions, probabilities):
@@ -102,7 +122,7 @@ def evaluate_output(X, X_prime, y, predictions, probabilities):
             'accuracy':accuracy,
             'fpr':fpr,
             'logloss':logloss,
-            'mae':mae,
+            'mae':float(mae),
             'precision':prec,
             'recall':recall,
             'ave_precision_score':aps,
