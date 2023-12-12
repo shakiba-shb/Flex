@@ -63,6 +63,14 @@ def setup_data(dataset,  seed, attributes=None):
         data_source = ACSDataSource(survey_year='2018', horizon='1-Year', survey='person')
         acs_data = data_source.get_data(states=["MI"], download=False)
         features, label, group = ACSdata[dataname].df_to_pandas(acs_data)
+        if ('AGEP' in features.columns):
+            bins=[0, .25, .50, .75, 1] 
+            features['AGEP'] = pd.qcut(features['AGEP'], q=bins, labels=False, duplicates='drop',retbins=False)
+            group['AGEP'] = pd.qcut(group['AGEP'], q=bins, labels=False, duplicates='drop',retbins=False)
+        print(features['AGEP'].value_counts())
+        print(group['AGEP'].value_counts())
+
+        print("#samples = ", len(features))
         label = label.squeeze()
         X_train, X_test, X_prime_train, X_prime_test, y_train, y_test,  = train_test_split(
             features, group, label, train_size=0.3, test_size=0.5, random_state=seed)
