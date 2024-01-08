@@ -55,7 +55,7 @@ def clean_dataset(dataset, attributes, centered):
     print('there are {} sensitive features including derivative features'.format(len(sens_names)))
 
     ## bin age into quartiles
-    quantiles = [-float('inf'), 0.25, 0.5, 0.75, 1]
+    quantiles = [0, 0.25, 0.50, 0.75, 1]
     if ('age' in X.columns):
         if dataname == 'student':
             bins=[0, 5, 10, 15, 20, 25]
