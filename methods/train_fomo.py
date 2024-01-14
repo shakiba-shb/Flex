@@ -1,5 +1,6 @@
 import numpy as np
 from pymoo.termination import get_termination
+import matplotlib.pyplot as plt
 
 def train(est, X_train, X_prime_train, y_train, X_test, sens_cols,**kwargs):
 
@@ -10,16 +11,18 @@ def train(est, X_train, X_prime_train, y_train, X_test, sens_cols,**kwargs):
         X_train, y_train, 
         protected_features=protected_features,
         #termination = get_termination("time", "00:00:10")
-        termination=('n_gen',3)
+        termination=('n_gen',2)
     )
     train_predictions = est.predict_archive(X_train)
     train_probabilities = est.predict_proba_archive(X_train)
     test_predictions = est.predict_archive(X_test)
     test_probabilities = est.predict_proba_archive(X_test)
+    history = est.res_.history
 
     return (
         train_predictions,
         test_predictions,
         train_probabilities,
-        test_probabilities
+        test_probabilities,
+        history
     )
