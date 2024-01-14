@@ -34,6 +34,20 @@ def evaluate(model_name, dataset, seed, rdir):
     test_predictions=res[1]
     train_probabilities=res[2]
     test_probabilities=res[3]
+    history = res[4]
+
+    #Save pareto front for each generation
+    count = 0
+    if (count == 0):
+        output_directory = 'pareto_files'
+        os.makedirs(output_directory, exist_ok=True)
+        for i, gen in enumerate(history):
+            objectives = np.array(gen.opt.get("F"))
+            ests = np.array(gen.opt.get("X"))
+            data = np.column_stack((objectives, ests))  # Concatenate the arrays
+            file_path = os.path.join(output_directory, f'generation_{i+1}.txt')
+            np.savetxt(file_path, data, delimiter=',', fmt='%.8f')
+            count += 1
 
     performance = []
     for i, (train_pred, test_pred, train_prob, test_prob) in enumerate(zip(
