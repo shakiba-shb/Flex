@@ -104,8 +104,8 @@ def evaluate_output(X, X_prime, y, predictions, probabilities):
         # _,auditor_fn_violation = auditor_fn.audit(predictions)
 
     # requires estimator
-    sg_fpr = subgroup_FPR_loss(y.values, predictions, X_prime)
-    sg_fnr = subgroup_FNR_loss(y.values, predictions, X_prime)
+    sg_fpr = subgroup_FPR_loss(y.values, probabilities, X_prime)
+    sg_fnr = subgroup_FNR_loss(y.values, probabilities, X_prime)
 
     accuracy = accuracy_score(y,predictions) 
     fpr = np.mean(false_positives(y,predictions))
