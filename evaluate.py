@@ -38,7 +38,7 @@ def evaluate(model_name, dataset, seed, rdir):
 
     #Save pareto front for each generation for one seed only
     if (seed == 42):
-        output_directory = 'pareto_files'
+        output_directory = os.path.join(rdir, 'pareto_history')
         os.makedirs(output_directory, exist_ok=True)
         for i, gen in enumerate(history):
             objectives = np.array(gen.opt.get("F"))
@@ -95,7 +95,7 @@ if __name__ == '__main__':
     # parse command line arguments
     parser = argparse.ArgumentParser(
         description="Evaluate a method on a dataset.", add_help=False)
-    parser.add_argument('-data', action='store', type=str, default='data/mimic4.csv',
+    parser.add_argument('-data', action='store', type=str, default='data/adult.csv',
                         help='Data file to analyze')
     # parser.add_argument('-atts', action='store', type=str,
     #                     help='File specifying protected attributes')
