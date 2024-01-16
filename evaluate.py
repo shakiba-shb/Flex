@@ -37,15 +37,18 @@ def evaluate(model_name, dataset, seed, rdir):
     history = res[4]
 
     #Save pareto front for each generation for one seed only
-    if (seed == 42):
-        output_directory = os.path.join(rdir, 'pareto_history')
-        os.makedirs(output_directory, exist_ok=True)
-        for i, gen in enumerate(history):
-            objectives = np.array(gen.opt.get("F"))
-            ests = np.array(gen.opt.get("X"))
-            data = np.column_stack((objectives, ests))  # Concatenate the arrays
-            file_path = os.path.join(output_directory, f'generation_{i+1}.txt')
-            np.savetxt(file_path, data, delimiter=',', fmt='%.8f')
+
+    output_directory = os.path.join(rdir, 'pareto_history')
+    os.makedirs(output_directory, exist_ok=True)
+    for i, gen in enumerate(history):
+        objectives = np.array(gen.opt.get("F")).tolist()
+        ests = np.array(gen.opt.get("X")).tolist()
+        fngs = np.array(gen.opt.get("fng")).tolist()
+        fns = np.array(gen.opt.get("fn")).tolist()
+        data = {'objectives': objectives, 'ests': ests, 'fngs': fngs, 'fns': fns}
+        file_path = os.path.join(output_directory, f'{model_name}_{seed}_generation_{i+1}.json')
+        with open(file_path, 'w') as f:
+            json.dump(data, f, indent=2)
 
     performance = []
     for i, (train_pred, test_pred, train_prob, test_prob) in enumerate(zip(
@@ -101,7 +104,7 @@ if __name__ == '__main__':
     #                     help='File specifying protected attributes')
     parser.add_argument('-h', '--help', action='help',
                         help='Show this help message and exit.')
-    parser.add_argument('-ml', action='store', default='fomo_flex_lr_fnr_linear',type=str,
+    parser.add_argument('-ml', action='store', default='fomo_lex_lr_fnr_linear',type=str,
             help='Name of estimator (with matching file in ml/)')
     parser.add_argument('-rdir', action='store', default='results', type=str,
                         help='Name of save file')
