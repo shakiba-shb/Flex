@@ -35,9 +35,9 @@ def evaluate(model_name, dataset, seed, rdir):
     train_probabilities=res[2]
     test_probabilities=res[3]
     history = res[4]
+    best_est = res[5]
 
     #Save pareto front for each generation for one seed only
-
     output_directory = os.path.join(rdir, 'pareto_history')
     os.makedirs(output_directory, exist_ok=True)
     for i, gen in enumerate(history):
@@ -47,6 +47,12 @@ def evaluate(model_name, dataset, seed, rdir):
         fns = np.array(gen.opt.get("fn")).tolist()
         data = {'objectives': objectives, 'ests': ests, 'fngs': fngs, 'fns': fns}
         file_path = os.path.join(output_directory, f'{model_name}_{seed}_generation_{i+1}.json')
+        #save best estimator data in the last generation
+        if (i == len(history) - 1):
+            data['best_est_F'] = best_est.get("F").tolist()
+            data['best_est_X'] = best_est.get("X").tolist()
+            data['best_est_fng'] = best_est.get("fng").tolist()
+            data['best_est_fn'] = best_est.get("fn").tolist()
         with open(file_path, 'w') as f:
             json.dump(data, f, indent=2)
 
@@ -106,7 +112,7 @@ if __name__ == '__main__':
                         help='Show this help message and exit.')
     parser.add_argument('-ml', action='store', default='fomo_lex_lr_fnr_linear',type=str,
             help='Name of estimator (with matching file in ml/)')
-    parser.add_argument('-rdir', action='store', default='results', type=str,
+    parser.add_argument('-rdir', action='store', default='results/report', type=str,
                         help='Name of save file')
     parser.add_argument('-seed', action='store', default=42, type=int, help='Seed / trial')
     args = parser.parse_args()
