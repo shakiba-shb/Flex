@@ -259,8 +259,6 @@ def get_hypervolume(perf, xname, yname, reverse_x=False,
         pf_y = [y_vals[t][i]/base_lines[dataset]['base_auroc'] for i in PF]
         hv[t] = pyhv.hypervolume([(xi,yi) for xi,yi in zip(pf_x,pf_y)],
                                                   ref=np.array([1,1]))
-        if hv[t]<0:
-            import ipdb; ipdb.set_trace()
     return [{'train':True, metric:hv['train']},
             {'train':False, metric:hv['test']}]
 
