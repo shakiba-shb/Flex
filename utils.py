@@ -225,13 +225,6 @@ from deap.tools._hypervolume import pyhv
             
 def get_hypervolume(perf, xname, yname, reverse_x=False, 
 		    reverse_y = False):
-    base_lines = {
-    'adult': {'base_auroc': 0.1629644152534065, 'base_subgroup_fnr': 0.0080437901922114},
-    'student': {'base_auroc': 0, 'base_subgroup_fnr': 0},
-    'lawschool': {'base_auroc': 0, 'base_subgroup_fnr': 0},
-    'mimic4': {'base_auroc': 0, 'base_subgroup_fnr': 0},
-    'ACSIncome': {'base_auroc': 0, 'base_subgroup_fnr': 0}
-    }
    
     x_vals = {'train':[], 'test':[]}
     y_vals = {'train':[], 'test':[]}
@@ -240,7 +233,7 @@ def get_hypervolume(perf, xname, yname, reverse_x=False,
         for t in ['train','test']:
             x_vals[t].append(p[t][xname])
             y_vals[t].append(p[t][yname])
-    dataset = perf[0]['dataset']    
+
     if reverse_x: 
         for t in ['train','test']:
             x_vals[t] = [-x for x in x_vals[t]]
@@ -255,10 +248,11 @@ def get_hypervolume(perf, xname, yname, reverse_x=False,
     hv = {'train':{}, 'test':{}}
     for t in ['train','test']:
         PF = front(x_vals[t],y_vals[t])
-        pf_x = [x_vals[t][i]/base_lines[dataset]['base_subgroup_fnr'] for i in PF]
-        pf_y = [y_vals[t][i]/base_lines[dataset]['base_auroc'] for i in PF]
+        pf_x = [x_vals[t][i]/max(x_vals[t]) for i in PF]
+        pf_y = [y_vals[t][i]/max(y_vals[t]) for i in PF]
         hv[t] = pyhv.hypervolume([(xi,yi) for xi,yi in zip(pf_x,pf_y)],
                                                   ref=np.array([1,1]))
+
     return [{'train':True, metric:hv['train']},
             {'train':False, metric:hv['test']}]
 

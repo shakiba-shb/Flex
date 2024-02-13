@@ -38,19 +38,19 @@ def evaluate(model_name, dataset, seed, rdir):
     best_est = res[5]
 
     # find baselines to normalize pareto fronts with no evolution
-    base_data = pd.DataFrame(columns = ['method', 'dataset', 'seed', 'worst_F1', 'worst_F2'])
-    worst_F1 = 0
-    worst_F2 = 0
-    for i, gen in enumerate(history):
-        objectives = np.array(gen.opt.get("F"))
-        objectives[:,0] = 1+objectives[:,0]
-        if (np.max(objectives[:,0]) > worst_F1):
-            worst_F1 = np.max(objectives[:,0])
-        if (np.max(objectives[:,1]) > worst_F2):
-            worst_F2 = np.max(objectives[:,1])
-    new_row = {'method':model_name, 'dataset':dataset_name, 'seed':seed, 'worst_F1':worst_F1, 'worst_F2':worst_F2}
-    new_row_df = pd.DataFrame([new_row])
-    new_row_df.to_csv('base_data.csv', mode='a', header=False, index=False)
+    # base_data = pd.DataFrame(columns = ['method', 'dataset', 'seed', 'worst_F1', 'worst_F2'])
+    # worst_F1 = 0
+    # worst_F2 = 0
+    # for i, gen in enumerate(history):
+    #     objectives = np.array(gen.opt.get("F"))
+    #     objectives[:,0] = 1+objectives[:,0]
+    #     if (np.max(objectives[:,0]) > worst_F1):
+    #         worst_F1 = np.max(objectives[:,0])
+    #     if (np.max(objectives[:,1]) > worst_F2):
+    #         worst_F2 = np.max(objectives[:,1])
+    # new_row = {'method':model_name, 'dataset':dataset_name, 'seed':seed, 'worst_F1':worst_F1, 'worst_F2':worst_F2}
+    # new_row_df = pd.DataFrame([new_row])
+    # new_row_df.to_csv('base_data.csv', mode='a', header=False, index=False)
 
     #Save pareto front for each generation for one seed only
     output_directory = os.path.join(rdir, 'pareto_history')
