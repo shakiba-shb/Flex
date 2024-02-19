@@ -196,13 +196,13 @@ def front(obj1,obj2):
 fair_metrics = {
     # 'auditor_fp_violation':'Audit FP Violation $\gamma$',
     # 'auditor_fn_violation':'Audit FN Violation $\gamma$',
-    'subgroup_fpr': 'Subgroup FPR',
+    #'subgroup_fpr': 'Subgroup FPR',
     'subgroup_fnr': 'Subgroup FNR',
     }
 loss_metrics = {
-    'accuracy':'1-Accuracy',
-    'ave_precision_score':'1-Average Precision Score',
-    'auc_prc':'1 - Area Under Precision-Recall Curve',
+    # 'accuracy':'1-Accuracy',
+    # 'ave_precision_score':'1-Average Precision Score',
+    # 'auc_prc':'1 - Area Under Precision-Recall Curve',
     'auc_roc':'1 - AUROC'
     }
 reverse_metrics = ['accuracy','precision','recall','ave_precision_score','auc_prc','auc_roc']
@@ -223,7 +223,7 @@ method_nice = {
 from deap.tools._hypervolume import pyhv 
 # compute hypervolumes of the Pareto front
             
-def get_hypervolume(perf, xname, yname, reverse_x=False, 
+def get_hypervolume(perf, xname, yname, base_x=1, base_y=1, reverse_x=False, 
 		    reverse_y = False):
    
     x_vals = {'train':[], 'test':[]}
@@ -248,19 +248,19 @@ def get_hypervolume(perf, xname, yname, reverse_x=False,
     hv = {'train':{}, 'test':{}}
     for t in ['train','test']:
         PF = front(x_vals[t],y_vals[t])
-        pf_x = [x_vals[t][i]/max(x_vals[t]) for i in PF]
-        pf_y = [y_vals[t][i]/max(y_vals[t]) for i in PF]
+        pf_x = [x_vals[t][i]/base_x for i in PF]
+        pf_y = [y_vals[t][i]/base_y for i in PF]
         hv[t] = pyhv.hypervolume([(xi,yi) for xi,yi in zip(pf_x,pf_y)],
                                                   ref=np.array([1,1]))
 
     return [{'train':True, metric:hv['train']},
             {'train':False, metric:hv['test']}]
 
-def get_hypervolumes(perf):
+def get_hypervolumes(perf, base_x=1, base_y=1):
     hv = [] 
     for f in fair_metrics.keys():
         for L in loss_metrics.keys():
-            hv += get_hypervolume(perf, f, L, reverse_y = L in reverse_metrics)
+            hv += get_hypervolume(perf, f, L, base_x, base_y, reverse_y = L in reverse_metrics)
                      
     return hv
 
@@ -524,3 +524,36 @@ def pareto_multicompare_plots(perfs, dataset_name, fm = fair_metrics,
         for L,Llabel in lm.items():
             pareto_multicompare_plot(perfs, dataset_name, f, L, flabel, Llabel,
                                reverse_y = L in reverse_metrics, rdir=rdir)
+
+def find_bases (perf, xname, yname, reverse_x=False, reverse_y=False):
+    
+    x_vals = {'train':[], 'test':[]}
+    y_vals = {'train':[], 'test':[]}
+
+    base_x = base_y = 0
+    
+    for i,p in enumerate(perf):
+        for t in ['train','test']:
+            x_vals[t].append(p[t][xname])
+            y_vals[t].append(p[t][yname])
+
+    if reverse_x: 
+        for t in ['train','test']:
+            x_vals[t] = [-x for x in x_vals[t]]
+    if reverse_y: 
+        for t in ['train','test']:
+            y_vals[t] = [1-y for y in y_vals[t]]
+    for t in ['train','test']:
+        x_vals[t] = np.array(x_vals[t])
+        y_vals[t] = np.array(y_vals[t])
+        
+    for t in ['train','test']:
+        PF = front(x_vals[t],y_vals[t])
+        pf_x = [x_vals[t][i] for i in PF]
+        pf_y = [y_vals[t][i] for i in PF]
+        if np.max(pf_x) > base_x:
+            base_x = np.max(pf_x)
+        if np.max(pf_y) > base_y:
+            base_y = np.max(pf_y)
+    
+    return base_x, base_y
