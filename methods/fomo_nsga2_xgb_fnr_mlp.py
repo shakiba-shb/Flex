@@ -1,6 +1,6 @@
 from fomo import FomoClassifier
 from pymoo.algorithms.moo.nsga2 import NSGA2 as algorithm
-from fomo.metrics import subgroup_FNR as metric
+from fomo.metrics import subgroup_FNR_scorer as metric
 from fomo.problem import MLPProblem
 
 from .train_fomo import train
