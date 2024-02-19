@@ -10,12 +10,24 @@ parser = argparse.ArgumentParser(description="Submit jobs.",
 									add_help=True)
 parser.add_argument('-ml', action='store', dest='mls', type=str,
 					default=(
-						'fomo_nsga2_lr_fnr'
+						'fomo_lex_lr_fnr_linear'
+						',fomo_lex_lr_fnr_mlp'
+						',fomo_lex_xgb_fnr_linear'
+						',fomo_lex_xgb_fnr_mlp'
+						',fomo_lex_lr_fnr'
+						',fomo_lex_xgb_fnr'
+						',fomo_flex_lr_fnr_linear'
+						',fomo_flex_lr_fnr_mlp'
+						',fomo_flex_xgb_fnr_linear'
+						',fomo_flex_xgb_fnr_mlp'
+						',fomo_flex_lr_fnr'
+						',fomo_flex_xgb_fnr'
 						',fomo_nsga2_lr_fnr_linear'
 						',fomo_nsga2_lr_fnr_mlp'
-						',fomo_nsga2_xgb_fnr'
 						',fomo_nsga2_xgb_fnr_linear'
 						',fomo_nsga2_xgb_fnr_mlp'
+						',fomo_nsga2_lr_fnr'
+						',fomo_nsga2_xgb_fnr'
 						)
 )
 parser.add_argument('-seeds', action='store', type=str, dest='SEEDS',
@@ -28,11 +40,11 @@ parser.add_argument('-datadir', action='store', type=str,
 					default='dataset')
 parser.add_argument('-rdir', action='store', 
 		default='results/', type=str, help='Results directory')
-parser.add_argument('-n_trials', action='store', dest='N_TRIALS', default=20,
+parser.add_argument('-n_trials', action='store', dest='N_TRIALS', default=25,
 					type=int, help='Number of trials to run')
 parser.add_argument('-n_jobs', action='store', default=1,
 					type=int, help='Number of parallel jobs')
-parser.add_argument('-mem', action='store', dest='mem', default=1000, type=int,
+parser.add_argument('-mem', action='store', dest='mem', default=5000, type=int,
 					help='memory request and limit (MB)')
 parser.add_argument('--slurm', action='store_true',
 					default=False, help='Run on an slurm HPC')
@@ -48,7 +60,7 @@ print('running these datasets:', datasets)
 print('and these methods:', mls)
 print('using these seeds:', seeds)
 
-q = 'ECODE'
+q = 'ecode'
 
 # write run commands
 all_commands = []
@@ -59,6 +71,7 @@ for seed, dataset, ml in it.product(seeds, datasets, mls):
 	os.makedirs(rdir, exist_ok=True)
 
 	datafile = '/'.join([args.datadir,dataset])+'.csv'
+	#datafile = 'ACSIncome'
 
 	all_commands.append(
 		f'python evaluate.py -data {datafile} -ml {ml} -rdir {rdir} -seed {seed}'
@@ -83,23 +96,28 @@ if args.slurm:
 
 		job_name = '_'.join([f'{job_info[i][x]}' for x in
 							['ml','dataset','seed']])
-		job_file = f'jobfiles/{job_name}.sbatch'
+		job_file = f'jobfiles/{job_name}.sb'
 		out_file = job_info[i]['rdir'] + job_name + '_%J.out'
 		# error_file = out_file[:-4] + '.err'
 
 		batch_script = (
 			f"""#!/usr/bin/bash 
+#SBATCH -A ecode
 #SBATCH --output={out_file} 
 #SBATCH --job-name={job_name} 
-#SBATCH --partition={q} 
 #SBATCH --ntasks={1} 
 #SBATCH --cpus-per-task={1} 
 #SBATCH --time={args.time}
 #SBATCH --mem={args.mem} 
-#SBATCH --nodelist=rdt01694
 
-echo $CONDA_EXE run -n exp-fomo {run_cmd}
-$CONDA_EXE run -n exp-fomo {run_cmd}
+date
+module purge
+module restore my_module
+source flex/bin/activate
+which python3
+{run_cmd}
+
+date
 """
 		)
 
