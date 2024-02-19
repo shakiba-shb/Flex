@@ -54,25 +54,26 @@ def evaluate(model_name, dataset, seed, rdir):
 
     #Save pareto front for each generation for one seed only
     output_directory = os.path.join(rdir, 'pareto_history')
-    os.makedirs(output_directory, exist_ok=True)
-    pareto_data = {}
-    for i, gen in enumerate(history):
-        objectives = np.array(gen.opt.get("F"))
-        objectives[:,0] = 1+objectives[:,0]
-        objectives = objectives.tolist()
-        ests = np.array(gen.opt.get("X")).tolist()
-        fngs = np.array(gen.opt.get("fng")).tolist()
-        fns = np.array(gen.opt.get("fn")).tolist()
-        pareto_data = {'objectives': objectives, 'ests': ests, 'fngs': fngs, 'fns': fns}
-        #save best estimator data in the last generation
-        if (i == len(history) - 1):
-            pareto_data['best_est_F'] = best_est.get("F").tolist()
-            pareto_data['best_est_X'] = best_est.get("X").tolist()
-            pareto_data['best_est_fng'] = best_est.get("fng").tolist()
-            pareto_data['best_est_fn'] = best_est.get("fn").tolist()
-        file_path = os.path.join(output_directory, f'{model_name}_{seed}_generation_{i+1}.json')
-        with open(file_path, 'w') as f:
-            json.dump(pareto_data, f, indent=2)
+    if (seed == 14724):
+        os.makedirs(output_directory, exist_ok=True)
+        pareto_data = {}
+        for i, gen in enumerate(history):
+            objectives = np.array(gen.opt.get("F"))
+            objectives[:,0] = 1+objectives[:,0]
+            objectives = objectives.tolist()
+            ests = np.array(gen.opt.get("X")).tolist()
+            fngs = np.array(gen.opt.get("fng")).tolist()
+            fns = np.array(gen.opt.get("fn")).tolist()
+            pareto_data = {'objectives': objectives, 'ests': ests, 'fngs': fngs, 'fns': fns}
+            #save best estimator data in the last generation
+            if (i == len(history) - 1):
+                pareto_data['best_est_F'] = best_est.get("F").tolist()
+                pareto_data['best_est_X'] = best_est.get("X").tolist()
+                pareto_data['best_est_fng'] = best_est.get("fng").tolist()
+                pareto_data['best_est_fn'] = best_est.get("fn").tolist()
+            file_path = os.path.join(output_directory, f'{model_name}_{seed}_generation_{i+1}.json')
+            with open(file_path, 'w') as f:
+                json.dump(pareto_data, f, indent=2)
 
     performance = []
     for i, (train_pred, test_pred, train_prob, test_prob) in enumerate(zip(
@@ -128,7 +129,7 @@ if __name__ == '__main__':
     #                     help='File specifying protected attributes')
     parser.add_argument('-h', '--help', action='help',
                         help='Show this help message and exit.')
-    parser.add_argument('-ml', action='store', default='fomo_lex_lr_fnr_linear',type=str,
+    parser.add_argument('-ml', action='store', default='fomo_nsga2_lr_fnr_linear',type=str,
             help='Name of estimator (with matching file in ml/)')
     parser.add_argument('-rdir', action='store', default='results', type=str,
                         help='Name of save file')
