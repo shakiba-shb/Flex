@@ -10,7 +10,7 @@ from ml.rf import est as base_est
 
 est = FomoClassifier(
     estimator = base_est,
-    algorithm = Lexicase(pop_size=10),
+    algorithm = Lexicase(pop_size=100),
     problem_type = LinearProblem, 
     fairness_metrics=[metric],
     store_final_models=True,

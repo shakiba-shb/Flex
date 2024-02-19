@@ -4,13 +4,13 @@ from fomo.metrics import subgroup_FNR_scorer as metric
 from fomo.algorithm import Lexicase
 
 from .train_fomo import train
-from sklearn.linear_model import LogisticRegression as ml
+from xgboost.sklearn import XGBClassifier as ml
 from ml.rf import est as base_est
 
 
 est = FomoClassifier(
     estimator = base_est,
-    algorithm = Lexicase(pop_size=50),
+    algorithm = Lexicase(pop_size=100),
     fairness_metrics=[metric],
     store_final_models=True,
     verbose=True,

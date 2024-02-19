@@ -11,7 +11,7 @@ def train(est, X_train, X_prime_train, y_train, X_test, sens_cols,**kwargs):
         X_train, y_train, 
         protected_features=protected_features,
         #termination = get_termination("time", "00:00:10")
-        termination=('n_gen',2)
+        termination=('n_gen',50)
     )
     train_predictions = est.predict_archive(X_train)
     train_probabilities = est.predict_proba_archive(X_train)

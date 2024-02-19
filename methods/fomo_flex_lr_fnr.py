@@ -9,7 +9,7 @@ from ml.lr import est as base_est
 
 est = FomoClassifier(
     estimator = base_est,
-    algorithm = Lexicase_NSGA2(pop_size=50),
+    algorithm = Lexicase_NSGA2(pop_size=100),
     fairness_metrics=[metric],
     store_final_models=True,
     verbose=True,
