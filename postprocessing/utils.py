@@ -89,8 +89,8 @@ def front(obj1,obj2):
     return front
 # metrics
 fair_metrics = {
-    'auditor_fp_violation':'Audit FP Violation $\gamma$',
-    'auditor_fn_violation':'Audit FN Violation $\gamma$',
+#    'auditor_fp_violation':'Audit FP Violation $\gamma$',
+#    'auditor_fn_violation':'Audit FN Violation $\gamma$',
     'subgroup_fpr': 'Subgroup FPR',
     'subgroup_fnr': 'Subgroup FNR',
     }
@@ -109,19 +109,7 @@ reverse_metrics = [
     'auc_prc',
     'auc_roc'
     ]
-# method_nice = {
-#     'gerryfair':'GerryFair',
-#     'gerryfair_xgb':'GerryFairGB',
-#     'feat_lex':'LEX',
-#     'feat_tourn':'Tourn',
-#     'feat_random_p100_g0':'Random0',
-#     'feat_random_p100_g100':'Random100',
-#     # 'feat_flex':'Flex',
-#     'feat_flex2':'FLEX',
-#     'feat_nsga2':'NSGA2',
-#     # 'feat_flex_nsga2':'FLEX-NSGA2',
-#     'feat_flex2_nsga2':'FLEX-NSGA2',
-# }
+
 method_nice = {
     'gerryfair_lr_fnr':'GerryFair-LR',
     'gerryfair_lr_fpr':'GerryFair-LR',
@@ -137,19 +125,32 @@ method_nice = {
     'feat_nsga2':'FEAT-NSGA2',
     'feat_flex_nsga2':'FLEX-NSGA2',
     'feat_flex2_nsga2':'FLEX-NSGA2',
-    'fomo_nsga2_lr_fnr':'FOMO-LR',
-    'fomo_nsga2_lr_fpr':'FOMO-LR',
-    'fomo_nsga2_lr_fnr_linear':'FOMO-LR-Lin',
-    'fomo_nsga2_lr_fpr_linear':'FOMO-LR-Lin',
-    'fomo_nsga2_lr_fnr_mlp':'FOMO-LR-MLP',
-    'fomo_nsga2_lr_fpr_mlp':'FOMO-LR-MLP',
-    'fomo_nsga2_xgb_fnr':'FOMO-XGB',
-    'fomo_nsga2_xgb_fpr':'FOMO-XGB',
-    'fomo_nsga2_xgb_fnr_linear':'FOMO-XGB-Lin',
-    'fomo_nsga2_xgb_fpr_linear':'FOMO-XGB-Lin',
-    'fomo_nsga2_xgb_fnr_mlp':'FOMO-XGB-MLP',
-    'fomo_nsga2_xgb_fpr_mlp':'FOMO-XGB-MLP' 
+    'fomo_nsga2_lr_fnr':'NSGA2-LR',
+    'fomo_nsga2_lr_fpr':'NSGA2-LR',
+    'fomo_nsga2_lr_fnr_linear':'NSGA2-LR-LIN',
+    'fomo_nsga2_lr_fpr_linear':'NSGA2-LR-LIN',
+    'fomo_nsga2_lr_fnr_mlp':'NSGA2-LR-NN',
+    'fomo_nsga2_lr_fpr_mlp':'NSGA2-LR-NN',
+    'fomo_nsga2_xgb_fnr':'NSGA2-RF',
+    'fomo_nsga2_xgb_fpr':'NSGA2-RF',
+    'fomo_nsga2_xgb_fnr_linear':'NSGA2-RF-LIN',
+    'fomo_nsga2_xgb_fpr_linear':'NSGA2-RF-LIN',
+    'fomo_nsga2_xgb_fnr_mlp':'NSGA2-RF-NN',
+    'fomo_nsga2_xgb_fpr_mlp':'NSGA2-RF-NN',
+    'fomo_flex_lr_fnr':'FLEX+NSGA2-LR',
+    'fomo_flex_xgb_fnr':'FLEX+NSGA2-RF',
+    'fomo_flex_lr_fnr_linear':'FLEX+NSGA2-LR-LIN',
+    'fomo_flex_lr_fnr_mlp':'FLEX+NSGA2-LR-NN',
+    'fomo_flex_xgb_fnr_linear':'FLEX+NSGA2-RF-LIN',
+    'fomo_flex_xgb_fnr_mlp':'FLEX+NSGA2-RF-NN',
+    'fomo_lex_lr_fnr':'FLEX-LR',
+    'fomo_lex_xgb_fnr':'FLEX-RF',
+    'fomo_lex_lr_fnr_linear':'FLEX-LR-LIN',
+    'fomo_lex_lr_fnr_mlp':'FLEX-LR-NN',
+    'fomo_lex_xgb_fnr_linear':'FLEX-RF-LIN',
+    'fomo_lex_xgb_fnr_mlp':'FLEX-RF-NN'
 }
+
 # Hypervolume tools
 from deap.tools._hypervolume import pyhv 
 # compute hypervolumes of the Pareto front
@@ -482,7 +483,7 @@ def pareto_multicompare_plot(perfs,dataset_name,xname,yname,xname_nice,
 def pareto_plots(perf):
     for f,flabel in fair_metrics.items():
         for L,Llabel in loss_metrics.items():
-            pareto_plot(perf, f, L, flabel, Llabel)
+            pareto_plot(perf, f, L, flabel, Llabel, reverse_y= L in reverse_metrics)
 
 def pareto_compare_plots(perf1,perf2, dataset_name):
     for f,flabel in fair_metrics.items():
