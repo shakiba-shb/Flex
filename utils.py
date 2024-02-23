@@ -3,7 +3,7 @@ import warnings
 # Data processing
 from sklearn.metrics import (accuracy_score, log_loss, precision_score, 
         recall_score, average_precision_score, precision_recall_curve, auc, 
-        roc_auc_score)
+        roc_auc_score, balanced_accuracy_score)
 from deap.tools import hypervolume
 from metrics import *
 #from fomo.metrics import subgroup_FNR, subgroup_FPR
@@ -107,7 +107,7 @@ def evaluate_output(X, X_prime, y, predictions, probabilities):
     sg_fpr = subgroup_FPR_loss(y.values, probabilities, X_prime)
     sg_fnr = subgroup_FNR_loss(y.values, probabilities, X_prime)
 
-    accuracy = accuracy_score(y,predictions) 
+    accuracy = balanced_accuracy_score(y,predictions) 
     fpr = np.mean(false_positives(y,predictions))
     logloss = log_loss(y, probabilities) 
     mae = MAE(y, probabilities) 
