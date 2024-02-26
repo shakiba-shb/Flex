@@ -196,13 +196,13 @@ def front(obj1,obj2):
 fair_metrics = {
     # 'auditor_fp_violation':'Audit FP Violation $\gamma$',
     # 'auditor_fn_violation':'Audit FN Violation $\gamma$',
-    #'subgroup_fpr': 'Subgroup FPR',
+    'subgroup_fpr': 'Subgroup FPR',
     'subgroup_fnr': 'Subgroup FNR',
     }
 loss_metrics = {
-    # 'accuracy':'1-Accuracy',
-    # 'ave_precision_score':'1-Average Precision Score',
-    # 'auc_prc':'1 - Area Under Precision-Recall Curve',
+    'accuracy':'1-Accuracy',
+    'ave_precision_score':'1-Average Precision Score',
+    'auc_prc':'1 - Area Under Precision-Recall Curve',
     'auc_roc':'1 - AUROC'
     }
 reverse_metrics = ['accuracy','precision','recall','ave_precision_score','auc_prc','auc_roc']
