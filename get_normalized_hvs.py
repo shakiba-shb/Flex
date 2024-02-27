@@ -51,6 +51,6 @@ for rdir in rdirs:
             hv = [{**header, **i} for i in hv]
             df_hv = pd.DataFrame.from_records(hv)
             df_hv.to_csv(
-                f'/home/shakiba/flex/results/Run_16/normalized_hvs_adult/hv_{model_name}_{seed}_{dataset_name}.csv',
+                f'/home/shakiba/flex/results/Run_16/normalized_hvs_synthetic1/hv_{model_name}_{seed}_{dataset_name}.csv',
                 index=False
             )
