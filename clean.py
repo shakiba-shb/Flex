@@ -45,14 +45,14 @@ def clean_dataset(dataset, attributes, centered):
 
     ## Do not use labels in rest of data
     X = df.loc[:, df.columns != y_col[0]]
-    X = X.loc[:, X.columns != 'Unnamed: 0']
+    X = X.loc[:, ~X.columns.str.contains('Unnamed')]
     ## Create X_prime, by getting protected attributes
     sens_cols = [str(c) for c in sens_df.columns if sens_df[c][0] == 1]
     print('sensitive features: {}'.format(sens_cols))
     sens_dict = {c: 1 if c in sens_cols else 0 for c in df.columns}
     #X, sens_dict = one_hot_code(X, sens_dict) 
     sens_names = [key for key in sens_dict.keys() if sens_dict[key] == 1]
-    print('there are {} sensitive features including derivative features'.format(len(sens_names)))
+    #print('there are {} sensitive features including derivative features'.format(len(sens_names)))
 
     ## bin age into quartiles
     quantiles = [0, 0.25, 0.50, 0.75, 1]
