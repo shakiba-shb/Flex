@@ -1,5 +1,5 @@
 from fomo import FomoClassifier
-from fomo.metrics import subgroup_FNR_scorer as metric
+from fomo.metrics import subgroup_FNR_scorer, subgroup_accuracy_scorer, subgroup_FPR_scorer
 from fomo.problem import MLPProblem
 from fomo.algorithm import Lexicase_NSGA2
 
@@ -11,7 +11,7 @@ est = FomoClassifier(
     estimator = base_est,
     algorithm = Lexicase_NSGA2(pop_size=100),
     problem_type = MLPProblem, 
-    fairness_metrics=[metric],
+    fairness_metrics=[subgroup_accuracy_scorer],
     store_final_models=True,
     verbose=True,
     n_jobs=1,

@@ -10,7 +10,7 @@ def train(est, X_train, X_prime_train, y_train, X_test, sens_cols,**kwargs):
     est.fit(
         X_train, y_train, 
         protected_features=protected_features,
-        #termination = get_termination("time", "00:00:10")
+        abs_val=True,
         termination=('n_gen',50)
     )
     train_predictions = est.predict_archive(X_train)
