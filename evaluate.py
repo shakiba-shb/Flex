@@ -9,7 +9,9 @@ import time
 import json
 import importlib
 import warnings
-warnings.filterwarnings("ignore", category=FutureWarning, module="xgboost")
+warnings.filterwarnings("ignore", category=FutureWarning, module="xgboost") 
+from deap.tools._hypervolume import pyhv
+from hv import HyperVolume
 
 def evaluate(model_name, dataset, seed, rdir):
     """Evaluates the estimator in methods/{model_name}.py on dataset and stores
@@ -37,21 +39,6 @@ def evaluate(model_name, dataset, seed, rdir):
     history = res[4]
     best_est = res[5]
 
-    # find baselines to normalize pareto fronts with no evolution
-    # base_data = pd.DataFrame(columns = ['method', 'dataset', 'seed', 'worst_F1', 'worst_F2'])
-    # worst_F1 = 0
-    # worst_F2 = 0
-    # for i, gen in enumerate(history):
-    #     objectives = np.array(gen.opt.get("F"))
-    #     objectives[:,0] = 1+objectives[:,0]
-    #     if (np.max(objectives[:,0]) > worst_F1):
-    #         worst_F1 = np.max(objectives[:,0])
-    #     if (np.max(objectives[:,1]) > worst_F2):
-    #         worst_F2 = np.max(objectives[:,1])
-    # new_row = {'method':model_name, 'dataset':dataset_name, 'seed':seed, 'worst_F1':worst_F1, 'worst_F2':worst_F2}
-    # new_row_df = pd.DataFrame([new_row])
-    # new_row_df.to_csv('base_data.csv', mode='a', header=False, index=False)
-
     #Save pareto front for each generation for one seed only
     output_directory = os.path.join(rdir, 'pareto_history')
     if (seed == 14724):
@@ -62,15 +49,15 @@ def evaluate(model_name, dataset, seed, rdir):
             objectives[:,0] = 1+objectives[:,0]
             objectives = objectives.tolist()
             ests = np.array(gen.opt.get("X")).tolist()
-            fngs = np.array(gen.opt.get("fng")).tolist()
-            fns = np.array(gen.opt.get("fn")).tolist()
-            pareto_data = {'objectives': objectives, 'ests': ests, 'fngs': fngs, 'fns': fns}
+            groups_loss = np.array(gen.opt.get("groups_loss")).tolist()
+            overall_loss = np.array(gen.opt.get("overal_loss")).tolist()
+            pareto_data = {'objectives': objectives, 'ests': ests, 'groups_loss': groups_loss, 'overall_loss': overall_loss}
             #save best estimator data in the last generation
             if (i == len(history) - 1):
                 pareto_data['best_est_F'] = best_est.get("F").tolist()
                 pareto_data['best_est_X'] = best_est.get("X").tolist()
-                pareto_data['best_est_fng'] = best_est.get("fng").tolist()
-                pareto_data['best_est_fn'] = best_est.get("fn").tolist()
+                pareto_data['best_est_groups_loss'] = best_est.get("groups_loss").tolist()
+                pareto_data['best_est_overall_loss'] = best_est.get("overall-loss").tolist()
             file_path = os.path.join(output_directory, f'{model_name}_{seed}_generation_{i+1}.json')
             with open(file_path, 'w') as f:
                 json.dump(pareto_data, f, indent=2)
@@ -113,6 +100,15 @@ def evaluate(model_name, dataset, seed, rdir):
             index=False
         )
     
+    # get direct HV of fomo pareto front
+    # objectives = np.array(history[-1].opt.get("F"))
+    # objectives[:,0] = 1+objectives[:,0]
+    # objectives = objectives.tolist()
+    # hv = pyhv.hypervolume([tuple(x) for x in objectives], ref=np.ones(len(objectives[0])))    
+    # new_row = {'method':model_name, 'dataset':dataset_name, 'seed':seed, 'hv':hv}
+    # new_row_df = pd.DataFrame([new_row])
+    # new_row_df.to_csv(f'{rdir}/my_hv_{model_name}_{seed}_{dataset_name}.csv', header=True, index=False)
+
     with open(f'{rdir}/perf_{model_name}_{dataset_name}_{seed}.json', 'w') as fp:
         json.dump(performance, fp, sort_keys=True, indent=2)
     return performance, df_hv
