@@ -6,7 +6,6 @@ from sklearn.metrics import (accuracy_score, log_loss, precision_score,
         roc_auc_score, balanced_accuracy_score)
 from deap.tools import hypervolume
 from metrics import *
-#from fomo.metrics import subgroup_FNR, subgroup_FPR
 from clean import clean_dataset
 from sklearn.model_selection import train_test_split
 from read_file import read_file
@@ -19,7 +18,7 @@ matplotlib.rcParams['pdf.fonttype'] = 42
 from folktables import ACSDataSource, ACSEmployment, ACSIncome, ACSPublicCoverage, ACSMobility, ACSEmployment, ACSTravelTime
 
 figsize=(12,4)
-from fomo.metrics import subgroup_FPR_loss, subgroup_FNR_loss
+from fomo.metrics import subgroup_FPR_loss, subgroup_FNR_loss, subgroup_accuracy_loss
 
 def setup_data(dataset,  seed, attributes=None):
     ACSdata = {
@@ -104,8 +103,9 @@ def evaluate_output(X, X_prime, y, predictions, probabilities):
         # _,auditor_fn_violation = auditor_fn.audit(predictions)
 
     # requires estimator
-    sg_fpr = subgroup_FPR_loss(y.values, probabilities, X_prime)
-    sg_fnr = subgroup_FNR_loss(y.values, probabilities, X_prime)
+    sg_fpr = subgroup_FPR_loss(y.values, probabilities, X_prime, abs_val=True)
+    sg_fnr = subgroup_FNR_loss(y.values, probabilities, X_prime, abs_val=True)
+    sg_acc = subgroup_accuracy_loss(y.values, predictions, X_prime, abs_val=True)
 
     accuracy = balanced_accuracy_score(y,predictions) 
     fpr = np.mean(false_positives(y,predictions))
@@ -127,6 +127,7 @@ def evaluate_output(X, X_prime, y, predictions, probabilities):
             # 'auditor_fn_violation':auditor_fn_violation,
             'subgroup_fpr':sg_fpr,
             'subgroup_fnr':sg_fnr,
+            'subgroup_acc':sg_acc,
             'accuracy':accuracy,
             'fpr':fpr,
             'logloss':logloss,
@@ -198,12 +199,13 @@ fair_metrics = {
     # 'auditor_fn_violation':'Audit FN Violation $\gamma$',
     'subgroup_fpr': 'Subgroup FPR',
     'subgroup_fnr': 'Subgroup FNR',
+    'subgroup_acc': 'Subgroup Accuracy',
     }
 loss_metrics = {
     'accuracy':'1-Accuracy',
     'ave_precision_score':'1-Average Precision Score',
-    'auc_prc':'1 - Area Under Precision-Recall Curve',
-    'auc_roc':'1 - AUROC'
+    'auc_prc':'1-Area Under Precision-Recall Curve',
+    'auc_roc':'1-AUROC'
     }
 reverse_metrics = ['accuracy','precision','recall','ave_precision_score','auc_prc','auc_roc']
 method_nice = {
