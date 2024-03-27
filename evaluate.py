@@ -49,15 +49,15 @@ def evaluate(model_name, dataset, seed, rdir):
             objectives[:,0] = 1+objectives[:,0]
             objectives = objectives.tolist()
             ests = np.array(gen.opt.get("X")).tolist()
-            groups_loss = np.array(gen.opt.get("groups_loss")).tolist()
-            overall_loss = np.array(gen.opt.get("overal_loss")).tolist()
-            pareto_data = {'objectives': objectives, 'ests': ests, 'groups_loss': groups_loss, 'overall_loss': overall_loss}
+            group_loss = np.array(gen.opt.get("group_loss")).tolist()
+            overall_loss = np.array(gen.opt.get("overall_loss")).tolist()
+            pareto_data = {'objectives': objectives, 'ests': ests, 'group_loss': group_loss, 'overall_loss': overall_loss}
             #save best estimator data in the last generation
             if (i == len(history) - 1):
                 pareto_data['best_est_F'] = best_est.get("F").tolist()
                 pareto_data['best_est_X'] = best_est.get("X").tolist()
-                pareto_data['best_est_groups_loss'] = best_est.get("groups_loss").tolist()
-                pareto_data['best_est_overall_loss'] = best_est.get("overall-loss").tolist()
+                pareto_data['best_est_group_loss'] = best_est.get("group_loss").tolist()
+                pareto_data['best_est_overall_loss'] = best_est.get("overall_loss").tolist()
             file_path = os.path.join(output_directory, f'{model_name}_{seed}_generation_{i+1}.json')
             with open(file_path, 'w') as f:
                 json.dump(pareto_data, f, indent=2)
@@ -119,7 +119,7 @@ if __name__ == '__main__':
     # parse command line arguments
     parser = argparse.ArgumentParser(
         description="Evaluate a method on a dataset.", add_help=False)
-    parser.add_argument('-data', action='store', type=str, default='data/adult.csv',
+    parser.add_argument('-data', action='store', type=str, default='data/synth.csv',
                         help='Data file to analyze')
     # parser.add_argument('-atts', action='store', type=str,
     #                     help='File specifying protected attributes')
