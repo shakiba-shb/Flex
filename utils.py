@@ -107,7 +107,7 @@ def evaluate_output(X, X_prime, y, predictions, probabilities):
     sg_fnr = subgroup_FNR_loss(y.values, probabilities, X_prime, abs_val=True)
     sg_acc = subgroup_accuracy_loss(y.values, predictions, X_prime, abs_val=True)
 
-    accuracy = balanced_accuracy_score(y,predictions) 
+    accuracy = accuracy_score(y,predictions) 
     fpr = np.mean(false_positives(y,predictions))
     logloss = log_loss(y, probabilities) 
     mae = MAE(y, probabilities) 
@@ -197,17 +197,17 @@ def front(obj1,obj2):
 fair_metrics = {
     # 'auditor_fp_violation':'Audit FP Violation $\gamma$',
     # 'auditor_fn_violation':'Audit FN Violation $\gamma$',
-    'subgroup_fpr': 'Subgroup FPR',
-    'subgroup_fnr': 'Subgroup FNR',
-    'subgroup_acc': 'Subgroup Accuracy',
+    # 'subgroup_fpr': 'Subgroup FPR',
+    # 'subgroup_fnr': 'Subgroup FNR',
+    'subgroup_acc': '1 - Subgroup Accuracy',
     }
 loss_metrics = {
     'accuracy':'1-Accuracy',
-    'ave_precision_score':'1-Average Precision Score',
-    'auc_prc':'1-Area Under Precision-Recall Curve',
-    'auc_roc':'1-AUROC'
+    # 'ave_precision_score':'1-Average Precision Score',
+    # 'auc_prc':'1-Area Under Precision-Recall Curve',
+    # 'auc_roc':'1-AUROC'
     }
-reverse_metrics = ['accuracy','precision','recall','ave_precision_score','auc_prc','auc_roc']
+reverse_metrics = ['accuracy','precision','recall','ave_precision_score','auc_prc','auc_roc', 'subgroup_acc']
 method_nice = {
     'gerryfair':'GerryFair',
     'gerryfair_xgb':'GerryFairGB',
@@ -238,7 +238,7 @@ def get_hypervolume(perf, xname, yname, base_x=1, base_y=1, reverse_x=False,
 
     if reverse_x: 
         for t in ['train','test']:
-            x_vals[t] = [-x for x in x_vals[t]]
+            x_vals[t] = [1+x for x in x_vals[t]]
     if reverse_y: 
         for t in ['train','test']:
             y_vals[t] = [1-y for y in y_vals[t]]
@@ -262,7 +262,7 @@ def get_hypervolumes(perf, base_x=1, base_y=1):
     hv = [] 
     for f in fair_metrics.keys():
         for L in loss_metrics.keys():
-            hv += get_hypervolume(perf, f, L, base_x, base_y, reverse_y = L in reverse_metrics)
+            hv += get_hypervolume(perf, f, L, base_x, base_y, reverse_y = L in reverse_metrics, reverse_x = f in reverse_metrics)
                      
     return hv
 

@@ -46,7 +46,7 @@ def evaluate(model_name, dataset, seed, rdir):
         pareto_data = {}
         for i, gen in enumerate(history):
             objectives = np.array(gen.opt.get("F"))
-            objectives[:,0] = 1+objectives[:,0]
+            #1+objectives[:,0]objectives[:,0]
             objectives = objectives.tolist()
             ests = np.array(gen.opt.get("X")).tolist()
             group_loss = np.array(gen.opt.get("group_loss")).tolist()
