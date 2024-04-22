@@ -11,7 +11,7 @@ import importlib
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning, module="xgboost") 
 from deap.tools._hypervolume import pyhv
-from hv import HyperVolume
+#from hv import HyperVolume
 
 def evaluate(model_name, dataset, seed, rdir):
     """Evaluates the estimator in methods/{model_name}.py on dataset and stores
@@ -39,7 +39,7 @@ def evaluate(model_name, dataset, seed, rdir):
     history = res[4]
     best_est = res[5]
 
-    #Save pareto front for each generation for one seed only
+    #Save pareto front history for each generation for desired seed
     output_directory = os.path.join(rdir, 'pareto_history')
     if (seed == 14724):
         os.makedirs(output_directory, exist_ok=True)
@@ -50,14 +50,12 @@ def evaluate(model_name, dataset, seed, rdir):
             objectives = objectives.tolist()
             ests = np.array(gen.opt.get("X")).tolist()
             group_loss = np.array(gen.opt.get("group_loss")).tolist()
-            overall_loss = np.array(gen.opt.get("overall_loss")).tolist()
-            pareto_data = {'objectives': objectives, 'ests': ests, 'group_loss': group_loss, 'overall_loss': overall_loss}
+            pareto_data = {'objectives': objectives, 'ests': ests, 'group_loss': group_loss}
             #save best estimator data in the last generation
             if (i == len(history) - 1):
                 pareto_data['best_est_F'] = best_est.get("F").tolist()
                 pareto_data['best_est_X'] = best_est.get("X").tolist()
                 pareto_data['best_est_group_loss'] = best_est.get("group_loss").tolist()
-                pareto_data['best_est_overall_loss'] = best_est.get("overall_loss").tolist()
             file_path = os.path.join(output_directory, f'{model_name}_{seed}_generation_{i+1}.json')
             with open(file_path, 'w') as f:
                 json.dump(pareto_data, f, indent=2)
@@ -119,7 +117,7 @@ if __name__ == '__main__':
     # parse command line arguments
     parser = argparse.ArgumentParser(
         description="Evaluate a method on a dataset.", add_help=False)
-    parser.add_argument('-data', action='store', type=str, default='data/synth.csv',
+    parser.add_argument('-data', action='store', type=str, default='data/adult.csv',
                         help='Data file to analyze')
     # parser.add_argument('-atts', action='store', type=str,
     #                     help='File specifying protected attributes')

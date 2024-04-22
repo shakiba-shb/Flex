@@ -18,7 +18,7 @@ matplotlib.rcParams['pdf.fonttype'] = 42
 from folktables import ACSDataSource, ACSEmployment, ACSIncome, ACSPublicCoverage, ACSMobility, ACSEmployment, ACSTravelTime
 
 figsize=(12,4)
-from fomo.metrics import subgroup_FPR_loss, subgroup_FNR_loss, subgroup_accuracy_loss
+from fomo.metrics import subgroup_FPR_loss, subgroup_FNR_loss, subgroup_accuracy_loss, subgroup_log_loss
 
 def setup_data(dataset,  seed, attributes=None):
     ACSdata = {
@@ -103,9 +103,10 @@ def evaluate_output(X, X_prime, y, predictions, probabilities):
         # _,auditor_fn_violation = auditor_fn.audit(predictions)
 
     # requires estimator
-    sg_fpr = subgroup_FPR_loss(y.values, probabilities, X_prime, abs_val=True)
-    sg_fnr = subgroup_FNR_loss(y.values, probabilities, X_prime, abs_val=True)
-    sg_acc = subgroup_accuracy_loss(y.values, predictions, X_prime, abs_val=True)
+    # sg_fpr = subgroup_FPR_loss(y.values, probabilities, X_prime, abs_val=True)
+    # sg_fnr = subgroup_FNR_loss(y.values, probabilities, X_prime, abs_val=True)
+    # sg_accuracy = subgroup_accuracy_loss(y.values, predictions, X_prime, abs_val=True)
+    sg_log_loss = subgroup_log_loss(y.values, probabilities, X_prime, abs_val=True)
 
     accuracy = accuracy_score(y,predictions) 
     fpr = np.mean(false_positives(y,predictions))
@@ -123,11 +124,10 @@ def evaluate_output(X, X_prime, y, predictions, probabilities):
     
                
     scores = {
-            # 'auditor_fp_violation':auditor_fp_violation,
-            # 'auditor_fn_violation':auditor_fn_violation,
-            'subgroup_fpr':sg_fpr,
-            'subgroup_fnr':sg_fnr,
-            'subgroup_acc':sg_acc,
+            # 'subgroup_fpr':sg_fpr,
+            # 'subgroup_fnr':sg_fnr,
+            # 'subgroup_acc':sg_accuracy,
+            'subgroup_log_loss':sg_log_loss,
             'accuracy':accuracy,
             'fpr':fpr,
             'logloss':logloss,
@@ -195,32 +195,20 @@ def front(obj1,obj2):
     return front
 # metrics
 fair_metrics = {
-    # 'auditor_fp_violation':'Audit FP Violation $\gamma$',
-    # 'auditor_fn_violation':'Audit FN Violation $\gamma$',
     # 'subgroup_fpr': 'Subgroup FPR',
     # 'subgroup_fnr': 'Subgroup FNR',
-    'subgroup_acc': '1 - Subgroup Accuracy',
+    # 'subgroup_acc': '1 - Subgroup Accuracy',
+    'subgroup_log_loss': 'Subgroup Log Loss',
     }
 loss_metrics = {
-    'accuracy':'1-Accuracy',
+    #'accuracy':'1-Accuracy',
     # 'ave_precision_score':'1-Average Precision Score',
     # 'auc_prc':'1-Area Under Precision-Recall Curve',
     # 'auc_roc':'1-AUROC'
+    'logloss':'Log Loss',
     }
-reverse_metrics = ['accuracy','precision','recall','ave_precision_score','auc_prc','auc_roc', 'subgroup_acc']
-method_nice = {
-    'gerryfair':'GerryFair',
-    'gerryfair_xgb':'GerryFairGB',
-    'feat_lex':'LEX',
-    'feat_tourn':'Tourn',
-    'feat_random_p100_g0':'Random0',
-    'feat_random_p100_g100':'Random100',
-    # 'feat_flex':'Flex',
-    'feat_flex2':'FLEX',
-    'feat_nsga2':'NSGA2',
-    # 'feat_flex_nsga2':'FLEX-NSGA2',
-    'feat_flex2_nsga2':'FLEX-NSGA2',
-}
+reverse_metrics = ['accuracy','precision','recall','ave_precision_score','auc_prc','auc_roc', 'subgroup_accuracy']
+
 # Hypervolume tools
 from deap.tools._hypervolume import pyhv 
 # compute hypervolumes of the Pareto front
