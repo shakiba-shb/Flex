@@ -18,7 +18,7 @@ matplotlib.rcParams['pdf.fonttype'] = 42
 from folktables import ACSDataSource, ACSEmployment, ACSIncome, ACSPublicCoverage, ACSMobility, ACSEmployment, ACSTravelTime
 
 figsize=(12,4)
-from fomo.metrics import subgroup_FPR_loss, subgroup_FNR_loss, subgroup_accuracy_loss, subgroup_log_loss
+from fomo.metrics import subgroup_FPR_loss, subgroup_FNR_loss, subgroup_accuracy_loss, subgroup_log_loss, subgroup_roc_loss
 
 def setup_data(dataset,  seed, attributes=None):
     ACSdata = {
@@ -106,7 +106,8 @@ def evaluate_output(X, X_prime, y, predictions, probabilities):
     # sg_fpr = subgroup_FPR_loss(y.values, probabilities, X_prime, abs_val=True)
     # sg_fnr = subgroup_FNR_loss(y.values, probabilities, X_prime, abs_val=True)
     # sg_accuracy = subgroup_accuracy_loss(y.values, predictions, X_prime, abs_val=True)
-    sg_log_loss = subgroup_log_loss(y.values, probabilities, X_prime, abs_val=True)
+    sg_logloss = subgroup_log_loss(y.values, probabilities, X_prime, abs_val=True)
+    sg_roc = subgroup_roc_loss(y.values, probabilities, X_prime, abs_val=True)
 
     accuracy = accuracy_score(y,predictions) 
     fpr = np.mean(false_positives(y,predictions))
@@ -126,8 +127,9 @@ def evaluate_output(X, X_prime, y, predictions, probabilities):
     scores = {
             # 'subgroup_fpr':sg_fpr,
             # 'subgroup_fnr':sg_fnr,
-            # 'subgroup_acc':sg_accuracy,
-            'subgroup_log_loss':sg_log_loss,
+            #'subgroup_acc':sg_accuracy,
+            'subgroup_roc':sg_roc,
+            'subgroup_logloss':sg_logloss,
             'accuracy':accuracy,
             'fpr':fpr,
             'logloss':logloss,
@@ -198,16 +200,18 @@ fair_metrics = {
     # 'subgroup_fpr': 'Subgroup FPR',
     # 'subgroup_fnr': 'Subgroup FNR',
     # 'subgroup_acc': '1 - Subgroup Accuracy',
-    'subgroup_log_loss': 'Subgroup Log Loss',
+    'subgroup_logloss': 'Subgroup Log Loss',
+    'subgroup_roc': '1 - Subgroup ROC Loss'
     }
 loss_metrics = {
     #'accuracy':'1-Accuracy',
     # 'ave_precision_score':'1-Average Precision Score',
     # 'auc_prc':'1-Area Under Precision-Recall Curve',
-    # 'auc_roc':'1-AUROC'
+    'auc_roc':'1-AUROC',
     'logloss':'Log Loss',
     }
-reverse_metrics = ['accuracy','precision','recall','ave_precision_score','auc_prc','auc_roc', 'subgroup_accuracy']
+reverse_metrics = ['accuracy','precision','recall','ave_precision_score','auc_prc','auc_roc', 
+                   'subgroup_acc', 'subgroup_roc']
 
 # Hypervolume tools
 from deap.tools._hypervolume import pyhv 
@@ -316,7 +320,7 @@ def pareto_compare_plot(perf1,perf2,dataset_name,xname,yname,xname_nice,
         # print('reversing x for ',xname)
         for m in [model1,model2]:
             for t in ['train','test']:
-                x_vals[m][t] = [-x for x in x_vals[m][t]]
+                x_vals[m][t] = [x for x in x_vals[m][t]]
     if reverse_y: 
         # print('reversing y for ',yname)
         for m in [model1,model2]:
