@@ -60,6 +60,18 @@ def evaluate(model_name, dataset, seed, rdir):
             with open(file_path, 'w') as f:
                 json.dump(pareto_data, f, indent=2)
 
+    # Compare group loss for each group across best estimators in different methods
+    output_directory = os.path.join(rdir, 'best_group_loss')
+    os.makedirs(output_directory, exist_ok=True)
+    best_est_dict = {}
+    best_est_dict['marginal_group_loss'] = best_est.get("group_loss").tolist()
+    best_est_dict['marginal_gp_lens'] = best_est.get("gp_lens").tolist()
+    best_est_dict['inter_group_loss'] = best_est.get("inter_group_loss").tolist()
+    best_est_dict['inter_gp_lens'] = best_est.get("inter_gp_lens").tolist()
+    file_path = os.path.join(output_directory, f'{model_name}_{seed}_best_est.json')
+    with open(file_path, 'w') as f:
+        json.dump(best_est_dict, f, indent=2)
+    
     performance = []
     for i, (train_pred, test_pred, train_prob, test_prob) in enumerate(zip(
         train_predictions,
