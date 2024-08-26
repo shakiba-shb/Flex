@@ -35,7 +35,6 @@ def setup_data(dataset,  seed, attributes=None):
     print('setting up data...') 
     dataname = dataset.split('/')[-1].split('.')[0]
     print('dataset:',dataname)
-    print('setting up data...') 
     if (dataname == 'mimic4'):
         FEATURES,LABEL,ENCODINGS=read_file(
             dataset,
@@ -107,7 +106,7 @@ def evaluate_output(X, X_prime, y, predictions, probabilities):
     # sg_fnr = subgroup_FNR_loss(y.values, probabilities, X_prime, abs_val=True)
     # sg_accuracy = subgroup_accuracy_loss(y.values, predictions, X_prime, abs_val=True)
     sg_logloss = subgroup_log_loss(y.values, probabilities, X_prime, abs_val=True)
-    sg_roc = subgroup_roc_loss(y.values, probabilities, X_prime, abs_val=True)
+    sg_roc = -1*subgroup_roc_loss(y.values, probabilities, X_prime, abs_val=True)
 
     accuracy = accuracy_score(y,predictions) 
     fpr = np.mean(false_positives(y,predictions))
@@ -230,7 +229,7 @@ def get_hypervolume(perf, xname, yname, base_x=1, base_y=1, reverse_x=False,
 
     if reverse_x: 
         for t in ['train','test']:
-            x_vals[t] = [1+x for x in x_vals[t]]
+            x_vals[t] = [1-x for x in x_vals[t]]
     if reverse_y: 
         for t in ['train','test']:
             y_vals[t] = [1-y for y in y_vals[t]]
@@ -273,7 +272,7 @@ def pareto_plot(perf,dataset_name,xname,yname,xname_nice,yname_nice,
         
     if reverse_x: 
         for t in ['train','test']:
-            x_vals[t] = [-x for x in x_vals[t]]
+            x_vals[t] = [1-x for x in x_vals[t]]
     if reverse_y: 
         for t in ['train','test']:
             y_vals[t] = [1-y for y in y_vals[t]]
@@ -420,7 +419,7 @@ def pareto_multicompare_plot(perfs,dataset_name,xname,yname,xname_nice,
         # print('reversing x for ',xname)
         for m in models:
             for t in ['train','test']:
-                x_vals[m][t] = [-x for x in x_vals[m][t]]
+                x_vals[m][t] = [1-x for x in x_vals[m][t]]
     if reverse_y: 
         # print('reversing y for ',yname)
         for m in models:

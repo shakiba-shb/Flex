@@ -49,14 +49,16 @@ def evaluate(model_name, dataset, seed, rdir):
             #1+objectives[:,0]objectives[:,0]
             objectives = objectives.tolist()
             ests = np.array(gen.opt.get("X")).tolist()
-            group_loss = np.array(gen.opt.get("group_loss")).tolist()
-            pareto_data = {'objectives': objectives, 'ests': ests, 'group_loss': group_loss}
+            marginal_group_loss = np.array(gen.opt.get("group_loss")).tolist()
+            intersectional_group_loss = np.array(gen.opt.get("inter_group_loss")).tolist()
+            pareto_data = {'objectives': objectives, 'ests': ests, 'margin_group_loss': marginal_group_loss, 'intersectional_group_loss': intersectional_group_loss}
             #save best estimator data in the last generation
             if (i == len(history) - 1):
                 pareto_data['best_est_F'] = best_est.get("F").tolist()
                 pareto_data['best_est_X'] = best_est.get("X").tolist()
-                pareto_data['best_est_group_loss'] = best_est.get("group_loss").tolist()
-            file_path = os.path.join(output_directory, f'{model_name}_{seed}_generation_{i+1}.json')
+                pareto_data['best_est_marginal_group_loss'] = best_est.get("group_loss").tolist()
+                pareto_data['best_est_intersectional_group_loss'] = best_est.get("inter_group_loss").tolist()
+            file_path = os.path.join(output_directory, f'{dataset_name}_{model_name}_{seed}_generation_{i+1}.json')
             with open(file_path, 'w') as f:
                 json.dump(pareto_data, f, indent=2)
 
@@ -68,7 +70,7 @@ def evaluate(model_name, dataset, seed, rdir):
     best_est_dict['marginal_gp_lens'] = best_est.get("gp_lens").tolist()
     best_est_dict['inter_group_loss'] = best_est.get("inter_group_loss").tolist()
     best_est_dict['inter_gp_lens'] = best_est.get("inter_gp_lens").tolist()
-    file_path = os.path.join(output_directory, f'{model_name}_{seed}_best_est.json')
+    file_path = os.path.join(output_directory, f'{dataset_name}_{model_name}_{seed}_best_est.json')
     with open(file_path, 'w') as f:
         json.dump(best_est_dict, f, indent=2)
     
