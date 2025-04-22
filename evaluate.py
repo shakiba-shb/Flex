@@ -39,6 +39,28 @@ def evaluate(model_name, dataset, seed, rdir):
     history = res[4]
     best_est = res[5]
 
+
+    #Save pareto front information for final generation
+    output_directory = os.path.join(rdir, 'group_performance')
+    os.makedirs(output_directory, exist_ok=True)
+    pareto_data = {}
+    model = history[-1]
+    objectives = np.array(model.opt.get("F"))
+    #1+objectives[:,0]objectives[:,0]
+    objectives = objectives.tolist()
+    ests = np.array(model.opt.get("X")).tolist()
+    marginal_group_loss = np.array(model.opt.get("group_loss")).tolist()
+    intersectional_group_loss = np.array(model.opt.get("inter_group_loss")).tolist()
+    pareto_data = {'objectives': objectives, 'ests': ests, 'margin_group_loss': marginal_group_loss, 'intersectional_group_loss': intersectional_group_loss}
+    #save best estimator data in the last generation
+    pareto_data['best_est_F'] = best_est.get("F").tolist()
+    pareto_data['best_est_X'] = best_est.get("X").tolist()
+    pareto_data['best_est_marginal_group_loss'] = best_est.get("group_loss").tolist()
+    pareto_data['best_est_intersectional_group_loss'] = best_est.get("inter_group_loss").tolist()
+    file_path = os.path.join(output_directory, f'{dataset_name}_{model_name}_{seed}_pareto_info.json')
+    with open(file_path, 'w') as f:
+        json.dump(pareto_data, f, indent=2)
+
     #Save pareto front history for each generation for desired seed
     output_directory = os.path.join(rdir, 'pareto_history')
     if (seed == 14724):
